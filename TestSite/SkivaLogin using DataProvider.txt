@@ -1,0 +1,189 @@
+package com.org.phinuMaven.phinuMavenProject;
+
+import java.io.IOException;
+import junit.framework.Assert;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+
+public class Skiva {
+	 
+	@Test
+	public void login()
+	{
+		System.out.println("Testing.....");
+		
+		WebDriver driver;	
+		driver=Utils.initial();
+		driver.findElement(By.linkText("Login")).click();
+		//Logging in
+		Utils.login(driver,"//input[@class='input'][@name='log']", "//input[@class='input'][@name='pwd']","phinu.skiva@gmail.com", "anabel");
+		//--
+	//	Assert.assertFalse(driver.findElement(By.xpath("//p[@class='wppb-error']")).isDisplayed());
+		Assert.assertTrue(driver.findElement(By.linkText("Logout")).isDisplayed());
+		
+		if(driver.findElement(By.linkText("Logout")).isDisplayed())
+		{
+			System.out.println("Logged In Successsfully");
+		}
+	/*	
+		if(driver.findElement(By.xpath("//p[@class='wppb-error']")).isDisplayed())
+		{
+			System.out.println("Invalid Email");
+			System.out.println(driver.findElement(By.xpath("//p[@class='wppb-error']")).getText());
+		}
+		else if(driver.findElement(By.linkText("Logout")).isDisplayed())
+		{
+			System.out.println("Logged In Successsfully");
+		}
+	 */	
+	}
+//^^------------------------------------------------------------------------------------------------
+	@DataProvider(name="skivaLog")
+	public static Object[][] skivaLogin() throws IOException
+	{
+		XSSFSheet sheet;
+		sheet=Utils.excel(0);
+		int row=4;
+		int col=2;
+		Object[][] obj=new Object[row][col];
+		
+		for(int r=0;r<row;r++)
+		{
+			for(int c=0;c<col;c++)
+			{
+				obj[r][c]=sheet.getRow(r).getCell(c).getStringCellValue();
+			}
+		}
+		return obj;
+	}
+//^^--------------------------------------------------------------------------------------------------	
+	@Test(dataProvider="skivaLog")
+	public void skivaLoginTest(String email,String pwd)
+	{
+		WebDriver driver=Utils.initial();
+		String emailXpath="//input[@class='input'][@name='log']";
+		String pwdXpath="//input[@class='input'][@name='pwd']";
+		
+		Utils.login(driver,emailXpath,pwdXpath ,email, pwd);
+		driver.close();
+	}
+//-^^-----------------------------------------------------------------------------------------------
+
+}
+//=====================================================================================================================
+//======================================================================================================================
+
+			Utils class-  Made by Phinu
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+package com.org.phinuMaven.phinuMavenProject;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+public class Utils {
+	
+	//Returns driver
+	public static WebDriver initial()
+	 {
+		WebDriver driver;
+		System.setProperty("webdriver.chrome.driver", "c:\\Users\\Phinu\\Desktop\\Software Testing\\2016\\chromedriver_win32\\chromedriver.exe");
+		driver=new ChromeDriver();
+		driver.get("http://www.skiva.com.au");
+		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+		return driver;
+	 }	
+//-----------------------------------------------------------------------------------------------	
+	//Login function
+	public static void login(WebDriver driver,String emailPath,String pwdPath,String emailValue,String pwdValue)
+	{
+				driver.findElement(By.linkText("Login")).click();
+				//clicking on email textbox
+				driver.findElement(By.xpath(emailPath)).click();
+				driver.findElement(By.xpath(emailPath)).sendKeys(emailValue);
+				//--
+				//clicking on password textbox
+				driver.findElement(By.xpath(pwdPath)).click();
+				driver.findElement(By.xpath(pwdPath)).sendKeys(pwdValue);		
+				//--
+				//clicking on Ligin button
+				driver.findElement(By.xpath("//input[@type='submit'][@value='Log In']")).click();
+				//--		
+	}
+//--------------------------------------------------------------------------------------------------	
+		
+	public static XSSFSheet excel(int sheetNum) throws IOException
+	{
+	File file=new File("C:\\Users\\Phinu\\Desktop\\Software Testing\\2016\\SkivaLoginData.xlsx");
+	FileInputStream stream=new FileInputStream(file);
+	XSSFWorkbook workbook=new XSSFWorkbook(stream);
+	XSSFSheet sheet=workbook.getSheetAt(sheetNum); //Sheet number is passed
+	workbook.close();
+	return sheet;
+	}
+	
+	//returns cell value as string regardless of celltype
+	static String getValue(int sheetNum, int row,int cell) throws IOException  
+	{
+		XSSFSheet sheet=excel(sheetNum);
+		String cellValue=sheet.getRow(row).getCell(cell).getStringCellValue();
+		
+		return cellValue;
+		
+	}
+//----------------------------------------------------------------------------------------------	 
+	//should returns total rows excluding the header rows
+
+	static int getDataRows(int sheetNum,int headerRowCount) throws IOException
+	{
+		XSSFSheet sheet=excel(sheetNum);
+		int totRow=(sheet.getLastRowNum()-headerRowCount)+1;
+		return totRow;
+	}
+	
+//-------------------------------------------------------------------------------------------------		
+	//should returns total rows including Header rows
+	
+	static int getTotalRows(int sheetNum) throws IOException
+	{
+		XSSFSheet sheet=excel(sheetNum);
+		int totRow=sheet.getLastRowNum()+1;
+		return totRow;
+		
+	}
+//--------------------------------------------------------------------------------------------------	
+	
+	// should return the index of last row
+	static int getLastRowIndex(int sheetNum) throws IOException
+	{
+		XSSFSheet sheet=excel(sheetNum);
+		int lastRow=sheet.getLastRowNum();
+		return lastRow;
+		
+	}
+	
+//--------------------------------------------------------------------------------------------------
+
+}
+
+
+
+
+
+
+
+
+
+
